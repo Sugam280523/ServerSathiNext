@@ -42,7 +42,8 @@ const Nic__Controller = {
             }
 
             // C. Hardcoded API Key (as per your request)
-            const apiKey = '6b6759df670bbfe68546da348e3d902d67a8605c96244e9ba8a48afcb0a12d46';
+            //const apiKey = '6b6759df670bbfe68546da348e3d902d67a8605c96244e9ba8a48afcb0a12d46';
+            const apiKey = '01702ded02cf9932866f5678373e693fc38fba71e90bdd9de734132943d42167';
 
             // D. Parse & Clean JSON
             const cleaned = cleanJsonInput(jsonInputRaw);
