@@ -108,18 +108,22 @@ const Nic__Controller = {
                 timeout: 20000
             });
 
-           // 6. Success Response (Standardized)
-                return res.status(200).json({
-                    statusCodec: 200,
-                    Status: "Success",
-                    Message: "Request processed successfully",
-                    Data: {
-                        statusCode: response.data.statusCode || 200, // Use NIC status or default 200
-                        status: response.data.status || "Success",
-                        message: response.data.message || "Data Fetched Successfully",
-                        data: response.data.data || response.data // Handle if NIC response is flat or nested
-                    }
-                });
+           // 6. Success Response (Flattened to the first result)
+                    const nicData = response.data.data || response.data;
+                    const firstItem = Array.isArray(nicData) ? nicData[0] : nicData;
+
+                    return res.status(200).json({
+                        statusCodec: 200,
+                        Status: "Success",
+                        Message: "Request processed successfully",
+                        Data: {
+                            statusCode: response.data.statusCode || 200,
+                            status: response.data.status || "Success",
+                            message: response.data.message || "Order details fetched successfully",
+                            // Spread the first item's properties here
+                            ...(firstItem || {}) 
+                        }
+                    });
 
         } catch (error) {
             // 7. Global Catch / Upstream Error Handling
