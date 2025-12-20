@@ -1,30 +1,19 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise'); // Note the /promise suffix
 
-// Use a Connection Pool for better performance and stability
 const pool = mysql.createPool({
-  // 1. Change 'localhost' to your Hostinger Hostname or IP from your screenshot
-  host: 'srv1127.hstgr.io', 
-  
-  // 2. Ensure these match your Hostinger Database User and Name
-  user: 'u877420011_Sathi',
-  password: 'Sugam@280523', 
-  database: 'u877420011_Sathi',
-  
-  // 3. Port for MySQL is always 3306
-  port: 3306,
-
-  // 4. ADD SSL: This is required for remote connections to Hostinger
-  ssl: {
-    rejectUnauthorized: false
-  },
-
-  // 5. Connection Management
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  connectTimeout: 10000 // Increases wait time for remote connection latency
+    host: process.env.DB_HOST || 'srv1127.hstgr.io',
+    user: process.env.DB_USER || 'u877420011_Sathi',
+    password: process.env.DB_PASSWORD || 'Sugam@280523',
+    database: process.env.DB_NAME || 'u877420011_Sathi',
+    port: 3306,
+    ssl: {
+        rejectUnauthorized: false
+    },
+    waitForConnections: true,
+    connectionLimit: 10
 });
-// Add this test block
+
+// This test block will now work correctly
 pool.getConnection()
     .then(conn => {
         console.log("✅ SUCCESS: Connected to Hostinger MySQL");
@@ -33,5 +22,5 @@ pool.getConnection()
     .catch(err => {
         console.error("❌ DATABASE CONNECTION ERROR:", err.message);
     });
-// Export the promise-based version
-module.exports = pool.promise();
+
+module.exports = pool;
