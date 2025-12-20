@@ -43,7 +43,7 @@ const Nic__Controller = {
                     statusCodec: 404,
                     Status: "Error",
                     Message: "Authorization Failed!",
-                    Data: { statusCode: 404, status: "Error", message: "Invalid Serial or License", data: [] }
+                    data: { statusCode: 404, status: "Error", message: "Invalid Serial or License", data: [] }
                 });
             }
 
@@ -60,7 +60,7 @@ const Nic__Controller = {
                     statusCodec: 401,
                     Status: "Error",
                     Message: "Authorization Failed!",
-                    Data: { statusCode: 401, status: "Error", message: "Invalid API Key Combination", data: [] }
+                    data: { statusCode: 401, status: "Error", message: "Invalid API Key Combination", data: [] }
                 });
             }
 
@@ -71,7 +71,7 @@ const Nic__Controller = {
                     statusCodec: 403,
                     Status: "Error",
                     Message: "Subscription Error",
-                    Data: { statusCode: 403, status: "Error", message: msg, data: [] }
+                    data: { statusCode: 403, status: "Error", message: msg, data: [] }
                 });
             }
 
@@ -82,7 +82,7 @@ const Nic__Controller = {
                     statusCodec: 400,
                     Status: "Error",
                     Message: "Bad Request",
-                    Data: { statusCode: 400, status: "Error", message: "Missing _dataToJson parameter", data: [] }
+                    data: { statusCode: 400, status: "Error", message: "Missing _dataToJson parameter", data: [] }
                 });
             }
 
@@ -95,7 +95,7 @@ const Nic__Controller = {
                     statusCodec: 400,
                     Status: "Error",
                     Message: "JSON Parse Error",
-                    Data: { statusCode: 400, status: "Error", message: "Invalid format in _dataToJson", data: [] }
+                    data: { statusCode: 400, status: "Error", message: "Invalid format in _dataToJson", data: [] }
                 });
             }
 
@@ -116,7 +116,7 @@ const Nic__Controller = {
                         statusCodec: 200,
                         Status: "Success",
                         Message: "Request processed successfully",
-                        Data: {
+                        data: {
                             statusCode: response.data.statusCode || 200,
                             status: response.data.status || "Success",
                             message: response.data.message || "Order details fetched successfully",
@@ -132,7 +132,7 @@ const Nic__Controller = {
                 statusCodec: status,
                 Status: "Error",
                 Message: `Request failed with status code ${status}`,
-                Data: error.response?.data || {
+                data: error.response?.data || {
                     statusCode: status,
                     status: "Error",
                     message: error.message,
