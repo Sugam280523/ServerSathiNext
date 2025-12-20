@@ -14,16 +14,6 @@ const pool = mysql.createPool({
     connectTimeout: 20000
 });
 
-// Detailed Test Block
-(async () => {
-    try {
-        const connection = await pool.getConnection();
-        console.log("✅ SUCCESS: Remote connection established!");
-        connection.release();
-    } catch (err) {
-        console.error("❌ DB ERROR CODE:", err.code);
-        console.error("❌ DB ERROR MESSAGE:", err.message);
-    }
-})();
+
 
 module.exports = pool;
