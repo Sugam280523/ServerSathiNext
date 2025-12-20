@@ -24,6 +24,14 @@ const pool = mysql.createPool({
   queueLimit: 0,
   connectTimeout: 10000 // Increases wait time for remote connection latency
 });
-
+// Add this test block
+pool.getConnection()
+    .then(conn => {
+        console.log("✅ SUCCESS: Connected to Hostinger MySQL");
+        conn.release();
+    })
+    .catch(err => {
+        console.error("❌ DATABASE CONNECTION ERROR:", err.message);
+    });
 // Export the promise-based version
 module.exports = pool.promise();
