@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-
+const db = require('./db');
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE'],
@@ -20,6 +20,7 @@ app.use('/', homeRoutes);
 //app.use('/', customerRoutes); // Using / to keep your exact CI URL structure
 //app.use('/', employeeRoutes);
 app.use('/', nicRoutes);
+
 
 // Change this in your app.js
 const PORT = process.env.PORT || 3000;

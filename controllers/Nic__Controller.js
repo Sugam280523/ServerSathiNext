@@ -1,5 +1,5 @@
 const axios = require('axios');
-
+const db = require('../db');
 // --- Helper Functions ---
 function cleanJsonInput(input) {
     if (!input) return "{}";
@@ -30,50 +30,110 @@ function determineUrl(apiType) {
 // --- Controller Object ---
 const Nic__Controller = {
     index: async (req, res) => {
+        const { licKey, serialKey, ownerCode, apiType } = req.params;
         try {
-            // A. Extract Path Params
-            const { serialKey, licNo, ownerCode, apiType } = req.params;
+            // 1. Database Validation: Find Customer
+            const [rows] = await db.query(
+                'SELECT DB_Cust__Id, DBApiKey, DB_ApiKey, DB_Cust__SathiCurrentStatus, DB_Cust__AMCExpired FROM db_tbl__customerdetails WHERE DB_Cust__SerialKey = ? AND DB_Cust__LicNo = ?',
+                [serialKey, ownerCode]
+            );
 
-            // B. Extract Query Param (?_dataToJson=...)
-            const jsonInputRaw = req.query._dataToJson;
-
-            if (!jsonInputRaw) {
-                return res.status(400).json({ Status: "Error", Message: "Missing _dataToJson parameter" });
+            if (!rows || rows.length === 0) {
+                return res.status(404).json({
+                    statusCodec: 404,
+                    Status: "Error",
+                    Message: "Authorization Failed!",
+                    Data: { statusCode: 404, status: "Error", message: "Invalid Serial or License", data: [] }
+                });
             }
 
-            // C. Hardcoded API Key (as per your request)
-            //const apiKey = '6b6759df670bbfe68546da348e3d902d67a8605c96244e9ba8a48afcb0a12d46';
-            const apiKey = '01702ded02cf9932866f5678373e693fc38fba71e90bdd9de734132943d42167';
+            const { DB_Cust__Id: CustId, DBApiKey: SugApiKey, DB_Cust__AMCExpired: sathiAMCExpired, DB_Cust__SathiCurrentStatus: sathiCurrentStatus, DB_ApiKey: apiKey } = rows[0];
 
-            // D. Parse & Clean JSON
+            // 2. Database Validation: API Key Pair
+            const [rows_Key_Validate] = await db.query(
+                'SELECT DB_Cust__Id FROM tbl_api_key WHERE DB_Cust__Id = ? AND Api_Key = ?',
+                [CustId, licKey + SugApiKey]
+            );
+
+            if (!rows_Key_Validate || rows_Key_Validate.length === 0) {
+                return res.status(401).json({
+                    statusCodec: 401,
+                    Status: "Error",
+                    Message: "Authorization Failed!",
+                    Data: { statusCode: 401, status: "Error", message: "Invalid API Key Combination", data: [] }
+                });
+            }
+
+            // 3. Status/AMC Check
+            if (sathiAMCExpired !== '1' && (sathiCurrentStatus === 'Live' || sathiCurrentStatus === 'Demo')) {
+                const msg = (sathiCurrentStatus === 'Live') ? "Your AMC has Expired!" : "Your Demo Period has Expired!";
+                return res.status(403).json({
+                    statusCodec: 403,
+                    Status: "Error",
+                    Message: "Subscription Error",
+                    Data: { statusCode: 403, status: "Error", message: msg, data: [] }
+                });
+            }
+
+            // 4. Input Processing
+            const jsonInputRaw = req.query._dataToJson;
+            if (!jsonInputRaw) {
+                return res.status(400).json({
+                    statusCodec: 400,
+                    Status: "Error",
+                    Message: "Bad Request",
+                    Data: { statusCode: 400, status: "Error", message: "Missing _dataToJson parameter", data: [] }
+                });
+            }
+
             const cleaned = cleanJsonInput(jsonInputRaw);
             let dataArray;
             try {
                 dataArray = JSON.parse(cleaned);
             } catch (e) {
-                return res.status(400).json({ Status: "Error", Message: "Invalid JSON format in _dataToJson" });
+                return res.status(400).json({
+                    statusCodec: 400,
+                    Status: "Error",
+                    Message: "JSON Parse Error",
+                    Data: { statusCode: 400, status: "Error", message: "Invalid format in _dataToJson", data: [] }
+                });
             }
-            
-            // E. Merge API Key with the Data
-            const finalPayload = { apiKey, ...dataArray };
 
-            // F. Forward Request to NIC
+            // 5. External API Call
+            const finalPayload = { apiKey, ...dataArray };
             const targetUrl = determineUrl(apiType);
+            
             const response = await axios.post(`https://${targetUrl}`, finalPayload, {
                 headers: { 'Content-Type': 'application/json' },
                 timeout: 20000
             });
 
-            // G. Send Upstream Response back to Client
-            return res.status(200).json(response.data);
+           // 6. Success Response (Standardized)
+                return res.status(200).json({
+                    statusCodec: 200,
+                    Status: "Success",
+                    Message: "Request processed successfully",
+                    Data: {
+                        statusCode: response.data.statusCode || 200, // Use NIC status or default 200
+                        status: response.data.status || "Success",
+                        message: response.data.message || "Data Fetched Successfully",
+                        data: response.data.data || response.data // Handle if NIC response is flat or nested
+                    }
+                });
 
         } catch (error) {
-            console.error("NIC API Proxy Error:", error.message);
-            return res.status(error.response?.status || 500).json({
-                statusCodec: error.response?.status || 500,
+            // 7. Global Catch / Upstream Error Handling
+            const status = error.response?.status || 500;
+            return res.status(status).json({
+                statusCodec: status,
                 Status: "Error",
-                Message: error.message,
-                Data: error.response?.data || ""
+                Message: `Request failed with status code ${status}`,
+                Data: error.response?.data || {
+                    statusCode: status,
+                    status: "Error",
+                    message: error.message,
+                    data: []
+                }
             });
         }
     }
