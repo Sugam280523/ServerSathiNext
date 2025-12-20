@@ -14,15 +14,16 @@ const pool = mysql.createPool({
     connectTimeout: 15000 // Give it more time for the internet connection
 });
 
-// This will now print the SPECIFIC error message in your Render logs
-pool.getConnection()
-    .then(conn => {
-        console.log("✅ DATABASE CONNECTED SUCCESSFULLY");
-        conn.release();
-    })
-    .catch(err => {
-        console.error("❌ DATABASE CONNECTION ERROR:", err.message); 
-        // This 'err.message' is what we need to see in your next log
-    });
+// Detailed Test Block
+(async () => {
+    try {
+        const connection = await pool.getConnection();
+        console.log("✅ SUCCESS: Remote connection established!");
+        connection.release();
+    } catch (err) {
+        console.error("❌ DB ERROR CODE:", err.code);
+        console.error("❌ DB ERROR MESSAGE:", err.message);
+    }
+})();
 
 module.exports = pool;
