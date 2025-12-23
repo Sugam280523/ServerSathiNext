@@ -1,5 +1,6 @@
 const axios = require('axios');
 const db = require('../db');
+const crypto = require('node:crypto');
 // --- Helper Functions ---
 function cleanJsonInput(input) {
     if (!input) return "{}";
@@ -26,15 +27,42 @@ function determineUrl(apiType) {
     // Default URL if apiType doesn't match
     return routes[apiType] || "demo.seedtrace.nic.in/inv-apis/billing/createSathiOrder";
 }
-
+//hash gerate key 
+/**
+ * Generates a SHA-512 hash using an API Key and a Timestamp.
+ * @param {string|number} ts - The current timestamp.
+ * @param {string} apiKey - The unique API key.
+ * @returns {string} - The hex-encoded hash string.
+ */
+function generateKeyHash(ts, apiKey) {
+    // Ensure both inputs are treated as strings
+    const dataToHash = String(apiKey) + String(ts);
+    
+    return crypto
+        .createHash('sha512')
+        .update(dataToHash)
+        .digest('hex');
+}
+/**
+ * Generates an HMAC-SHA512 signature.
+ * @param {Object} body - The JSON payload from Tally/Client.
+ * @param {string} apiKey - The secret API Key.
+ */
+function generateHmacSignature(data, key) {
+    const crypto = require('crypto');
+    return crypto.createHmac('sha512', key) // Or 'sha256' depending on your API docs
+                 .update(data)
+                 .digest('hex');
+}
 // --- Controller Object ---
 const Nic__Controller = {
     index: async (req, res) => {
         const { licKey, serialKey, ownerCode, apiType } = req.params;
         try {
+            
             // 1. Database Validation: Find Customer
             const [rows] = await db.query(
-                'SELECT DB_Cust__Id, DBApiKey, DB_ApiKey, DB_Cust__SathiCurrentStatus, DB_Cust__AMCExpired FROM db_tbl__customerdetails WHERE DB_Cust__SerialKey = ? AND DB_Cust__LicNo = ?',
+                'SELECT DB_Cust__Id, DBApiKey, DB_ApiKey, DB__clientsecret,DB_Cust__SathiCurrentStatus, DB_Cust__AMCExpired FROM db_tbl__customerdetails WHERE DB_Cust__SerialKey = ? AND DB_Cust__LicNo = ?',
                 [serialKey, ownerCode]
             );
 
@@ -47,7 +75,7 @@ const Nic__Controller = {
                 });
             }
 
-            const { DB_Cust__Id: CustId, DBApiKey: SugApiKey, DB_Cust__AMCExpired: sathiAMCExpired, DB_Cust__SathiCurrentStatus: sathiCurrentStatus, DB_ApiKey: apiKey } = rows[0];
+            const { DB_Cust__Id: CustId, DBApiKey: SugApiKey, DB__clientsecret:clientsecret, DB_Cust__AMCExpired: sathiAMCExpired, DB_Cust__SathiCurrentStatus: sathiCurrentStatus, DB_ApiKey: apiKey } = rows[0];
 
             // 2. Database Validation: API Key Pair
             const [rows_Key_Validate] = await db.query(
@@ -100,12 +128,39 @@ const Nic__Controller = {
             }
 
             // 5. External API Call
-            const finalPayload = { apiKey, ...dataArray };
-            const targetUrl = determineUrl(apiType);
+            //const finalPayload = { apiKey, ...dataArray };
+            // 2. Generate the timestamp and call your function
+            let ts = Date.now(); 
+            let keyHash = generateKeyHash(ts, apiKey); // <--- CALLING HERE
+           
+           const finalPayload = {
+                keyHash: keyHash,
+                ts: ts,
+                ...dataArray
+            };
+
+            // 2. IMPORTANT: Generate signature using the JSON string 
+            // standard practice is to sign the exact string being sent
+           const payloadString = JSON.stringify(finalPayload);
+            let signature = generateHmacSignature(payloadString, apiKey);
+            // Define clientSecret based on ownerCode
             
-            const response = await axios.post(`https://${targetUrl}`, finalPayload, {
-                headers: { 'Content-Type': 'application/json' },
-                timeout: 20000
+            // 3. Prepare headers
+            const customHeaders = {                  
+                "clientid": ownerCode,          
+                "clientsecret": clientsecret, // Now using the variable
+                "signature": signature,
+                "Content-Type": "application/json"
+            };
+            const targetUrl = determineUrl(apiType);
+
+            // Debugging: Log exactly what is being sent
+           // console.log("FINAL PAYLOAD STRING:", payloadString);
+           // console.log("GENERATED SIGNATURE:", signature);
+
+            const response = await axios.post(`https://${targetUrl}`, payloadString, {
+                headers: customHeaders,
+                timeout: 5000 // 2000ms is too short for NIC servers, use 5000ms
             });
 
            // 6. Success Response (Flattened to the first result)
@@ -131,12 +186,12 @@ const Nic__Controller = {
             return res.status(status).json({
                 statusCodec: status,
                 Status: "Error",
-                Message: `Request failed with status code ${status}`,
+                Message: `Request  failed with status code ${status }`,
+                //Message: error.response.data.message ,
                 data: error.response?.data || {
                     statusCode: status,
                     status: "Error",
-                    message: error.message,
-                    data: []
+                    message: error.message
                 }
             });
         }
