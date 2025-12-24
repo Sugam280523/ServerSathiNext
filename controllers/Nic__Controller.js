@@ -163,34 +163,31 @@ const Nic__Controller = {
                 //timeout: 10000 // 2000ms is too short for NIC servers, use 5000ms
             });
 
-            // 6. Success Response (Handling Hybrid Format)
-                const nicData = response.data.data || response.data;
-
-                // If it's not an array, wrap it in one to keep logic consistent
+            // 6. Success Response
+               const nicData = response.data.data || response.data;
                 const dataEArray = Array.isArray(nicData) ? nicData : [nicData];
 
-                const finalResponse = dataEArray.map((item, index) => {
-                    // For the FIRST item: add the status, message, and statusCode headers
-                    if (index === 0) {
-                        return {
-                            statusCode: 200,
-                            Status: "Success",
-                            Message: "Request processed successfully",
-                            data: {
-                                statusCode: response.data.statusCode || 200,
-                                status: response.data.status || "Success",
-                                message: response.data.message || "Order details fetched successfully",
-                                ...item // Spread the properties of the 1st item
-                            }
-                        };
+                // We manually build the text string to avoid JSON rules
+                const part1 = {
+                    statusCode: 200,
+                    Status: "Success",
+                    Message: "Request processed successfully",
+                    data: {
+                        statusCode: response.data.statusCode || 200,
+                        status: response.data.status || "Success",
+                        message: response.data.message || "Order details fetched successfully",
+                        ...(dataEArray[0] || {})
                     }
-                    // For ALL OTHER items: return the object as it is
-                    return item;
-                });
+                };
 
-                // Note: If you want these as separate objects in one JSON response, 
-                // they must be wrapped in a parent array to be valid JSON.
-                return res.status(200).json(finalResponse);
+                const part2 = dataEArray[1] || {};
+
+                // Convert to string, remove the last '}', add the second object, then close it
+                let outputString = JSON.stringify(part1, null, 4);
+                outputString = outputString.substring(0, outputString.lastIndexOf('}'));
+                outputString += ",\n" + JSON.stringify(part2, null, 4) + "\n}";
+
+                return res.status(200).send(outputString);
 
         } catch (error) {
             // 7. Global Catch / Upstream Error Handling
