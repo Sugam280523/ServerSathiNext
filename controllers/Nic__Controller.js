@@ -160,7 +160,7 @@ const Nic__Controller = {
 
             const response = await axios.post(`https://${targetUrl}`, payloadString, {
                 headers: customHeaders,
-                timeout: 5000 // 2000ms is too short for NIC servers, use 5000ms
+                timeout: 1000 // 2000ms is too short for NIC servers, use 5000ms
             });
 
            // 6. Success Response (Flattened to the first result)
