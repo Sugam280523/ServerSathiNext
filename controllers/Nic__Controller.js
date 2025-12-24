@@ -164,30 +164,31 @@ const Nic__Controller = {
             });
 
             // 6. Success Response
-               const nicData = response.data.data || response.data;
+                const nicData = response.data.data || response.data;
                 const dataEArray = Array.isArray(nicData) ? nicData : [nicData];
 
-                // We manually build the text string to avoid JSON rules
-                const part1 = {
+                // Map through the items to create the specific structure you want
+                const formattedData = dataEArray.map((item, index) => {
+                    if (index === 0) {
+                        // Only for the first item, add the status information
+                        return {
+                            statusCode: response.data.statusCode || 200,
+                            status: response.data.status || "Success",
+                            message: response.data.message || "Order details fetched successfully",
+                            ...item
+                        };
+                    }
+                    // For all other items (index 1 to n), return them exactly as they are
+                    return item;
+                });
+
+                // Final JSON response with the formatted data array
+                return res.status(200).json({
                     statusCode: 200,
                     Status: "Success",
                     Message: "Request processed successfully",
-                    data: {
-                        statusCode: response.data.statusCode || 200,
-                        status: response.data.status || "Success",
-                        message: response.data.message || "Order details fetched successfully",
-                        ...(dataEArray[0] || {})
-                    }
-                };
-
-                const part2 = dataEArray[1] || {};
-
-                // Convert to string, remove the last '}', add the second object, then close it
-                let outputString = JSON.stringify(part1, null, 4);
-                outputString = outputString.substring(0, outputString.lastIndexOf('}'));
-                outputString += ",\n" + JSON.stringify(part2, null, 4) + "\n}";
-
-                return res.status(200).send(outputString);
+                    data: formattedData
+                });
 
         } catch (error) {
             // 7. Global Catch / Upstream Error Handling
