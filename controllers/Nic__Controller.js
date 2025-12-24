@@ -155,30 +155,42 @@ const Nic__Controller = {
             const targetUrl = determineUrl(apiType);
 
             // Debugging: Log exactly what is being sent
-           // console.log("FINAL PAYLOAD STRING:", payloadString);
-           // console.log("GENERATED SIGNATURE:", signature);
+            //console.log("FINAL PAYLOAD STRING:", payloadString);
+            //console.log("GENERATED SIGNATURE:", signature);
 
             const response = await axios.post(`https://${targetUrl}`, payloadString, {
-                headers: customHeaders,
-                timeout: 1000 // 2000ms is too short for NIC servers, use 5000ms
+                headers: customHeaders
+                //timeout: 10000 // 2000ms is too short for NIC servers, use 5000ms
             });
 
-           // 6. Success Response (Flattened to the first result)
-                    const nicData = response.data.data || response.data;
-                    const firstItem = Array.isArray(nicData) ? nicData[0] : nicData;
+            // 6. Success Response (Handling Hybrid Format)
+                const nicData = response.data.data || response.data;
 
-                    return res.status(200).json({
-                        statusCodec: 200,
-                        Status: "Success",
-                        Message: "Request processed successfully",
-                        data: {
-                            statusCode: response.data.statusCode || 200,
-                            status: response.data.status || "Success",
-                            message: response.data.message || "Order details fetched successfully",
-                            // Spread the first item's properties here
-                            ...(firstItem || {}) 
-                        }
-                    });
+                // If it's not an array, wrap it in one to keep logic consistent
+                const dataEArray = Array.isArray(nicData) ? nicData : [nicData];
+
+                const finalResponse = dataEArray.map((item, index) => {
+                    // For the FIRST item: add the status, message, and statusCode headers
+                    if (index === 0) {
+                        return {
+                            statusCode: 200,
+                            Status: "Success",
+                            Message: "Request processed successfully",
+                            data: {
+                                statusCode: response.data.statusCode || 200,
+                                status: response.data.status || "Success",
+                                message: response.data.message || "Order details fetched successfully",
+                                ...item // Spread the properties of the 1st item
+                            }
+                        };
+                    }
+                    // For ALL OTHER items: return the object as it is
+                    return item;
+                });
+
+                // Note: If you want these as separate objects in one JSON response, 
+                // they must be wrapped in a parent array to be valid JSON.
+                return res.status(200).json(finalResponse);
 
         } catch (error) {
             // 7. Global Catch / Upstream Error Handling
