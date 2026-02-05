@@ -1,0 +1,130 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3">Customer</h3>
+      <ul class="breadcrumbs mb-3">
+        <li class="nav-home"><a href="#"><i class="icon-home"></i></a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Customer</a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Customer Demo Activation</a></li>
+      </ul>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Customer Demo Activation</div>
+            <p><span class="text-danger">*</span> All fields are mandatory</p>
+          </div>
+          <div class="card-body">
+            <form id="formId" action="/Demo" method="POST" autocomplete="Off">
+              
+               <% if (success) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Success!</strong> <%= success %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error!</strong> <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+              <div class="row">
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="CustomerID">Select Customer</label>
+                    <select class="form-select" id="CustomerID" name="CustomerID">
+                      <option disabled selected value="">Select Activation Customer</option>
+                      <% customerdata.forEach(function(cust) { %>
+                        <option value="<%= cust.DB_Cust__Id %>" <%= (formData.CustomerID == cust.DB_Cust__Id) ? 'selected' : '' %>>
+                          <%= cust.DB_Cust__Name %> [<%= cust.DB_Cust__FirmName %>]
+                        </option>
+                      <% }); %>
+                    </select>
+                    <span class="text-danger small"><%= errors.CustomerID ? errors.CustomerID.msg : '' %></span>
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label>Customer Details</label>
+                    <div id="Customer-Profile-Details" class="p-2 border rounded bg-light" style="min-height: 100px;">
+                      </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="CustLicNo">Customer Lic. No</label>
+                    <input type="text" class="form-control" id="CustLicNo" name="CustLicNo" placeholder="Enter Customer Lic. No" value="<%= formData.CustLicNo || '' %>" />
+                    <span class="text-danger small"><%= errors.CustLicNo ? errors.CustLicNo.msg : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ApiKey">API Key</label>
+                    <input type="text" class="form-control" id="ApiKey" name="ApiKey" placeholder="Enter Api Key" value="<%= formData.ApiKey || '' %>" />
+                    <span class="text-danger small"><%= errors.ApiKey ? errors.ApiKey.msg : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="clientsecret">ClientSecret Key</label>
+                    <input type="text" class="form-control" id="clientsecret" name="clientsecret" placeholder="Enter clientsecret Key" value="<%= formData.clientsecret || '' %>" />
+                    <span class="text-danger small"><%= errors.clientsecret ? errors.clientsecret.msg : '' %></span>
+                  </div>
+
+                  <div class="card-action mt-3">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    <button type="button" class="btn btn-danger" onclick="location.reload();">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+document.getElementById('CustomerID').addEventListener('change', function() {
+    const custId = this.value;
+    const detailBox = document.getElementById('Customer-Profile-Details');
+    
+    detailBox.innerHTML = "Loading...";
+    
+    fetch(`/getCustomerDetails/${custId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Check if data exists and get the first item from the array
+            if (data && data.length > 0) {
+                const customer = data[0]; 
+                
+                detailBox.innerHTML = `
+                    <strong>Firm:</strong> ${customer.DB_Cust__FirmName}<br>
+                    <strong>Owner Name:</strong> ${customer.DB_Cust__Name}<br>
+                    <strong>Mobile:</strong> ${customer.DB_Cust__MobileNo}<br>
+                    <strong>City:</strong> ${customer.DB_Cust__city}<br>
+                    <strong>Address:</strong> ${customer.DB_Cust__Address}<br>
+                    <strong>State:</strong> ${customer.DB_Cust__State}<br>
+                    <strong>Serial Key:</strong> ${customer.DB_Cust__SerialKey}<br>
+                `;
+            } else {
+                detailBox.innerHTML = "No details found.";
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            detailBox.innerHTML = "Error loading details.";
+        });
+});
+</script>

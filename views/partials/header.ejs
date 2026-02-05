@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>SATHI - Sugam Softtech</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="/assets/img/favicon/favicon.ico" type="image/x-icon" />
+
+    <script src="/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.bootstrap5.min.css">
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    
+    <link rel="stylesheet" href="/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="/assets/css/demo.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+    
+        <script>
+            // Automatically close alerts after 5 seconds
+            window.setTimeout(function() {
+                $(".alert").fadeTo(500, 0).slideUp(500, function(){
+                    $(this).remove(); 
+                });
+            }, 5000);
+        </script>
+</head>
+<body>
+    <input type="hidden" id="user_Role" value="<%= user ? user.user_Role : '' %>" />
+
+    <div class="wrapper">
+        <div class="sidebar" data-background-color="dark">
+            <div class="sidebar-logo">
+                <div class="logo-header" data-background-color="dark">
+                    <a href="/Dashboard" class="logo">
+                        <img src="/assets/Logo/Logo1.png" alt="navbar brand" class="navbar-brand" height="50" />
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                        <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+                    </div>
+                    <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+                </div>
+            </div>
+            
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                <div class="sidebar-content">
+                    <ul class="nav nav-secondary">
+                        <li class="nav-item active">
+                            <a data-bs-toggle="collapse" href="#dashboard">
+                                <i class="fas fa-home"></i>
+                                <p>Dashboard</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse show" id="dashboard">
+                                <ul class="nav nav-collapse">
+                                    <li><a href="/Dashboard"><span class="sub-item">Main Dashboard</span></a></li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="nav-section">
+                            <h4 class="text-section">Components</h4>
+                        </li>
+
+                        <li class="nav-item">
+                            <a data-bs-toggle="collapse" href="#Lead">
+                                <i class="fas fa-th-list"></i>
+                                <p>Lead</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="Lead">
+                                <ul class="nav nav-collapse">
+                                    <li><a href="/Lead"><span class="sub-item">Lead Creation</span></a></li>
+                                    <li><a href="/LeadTable"><span class="sub-item">Lead Report</span></a></li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a data-bs-toggle="collapse" href="#Demo">
+                                <i class="fas fa-play-circle"></i>
+                                <p>Demo</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="Demo">
+                                <ul class="nav nav-collapse">
+                                    <li><a href="/Demo"><span class="sub-item">Demo Creation</span></a></li>
+                                    <li><a href="/DemoTable"><span class="sub-item">Demo Report</span></a></li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a data-bs-toggle="collapse" href="#Activation">
+                                <i class="fas fa-check-circle"></i>
+                                <p>Activation</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="Activation">
+                                <ul class="nav nav-collapse">
+                                    <li><a href="/Activation"><span class="sub-item">Activation</span></a></li>
+                                    <li><a href="/ActivationTable"><span class="sub-item">Activation Report</span></a></li>
+                                </ul>
+                            </div>
+                        </li>
+
+                        <% if (user && (user.role === 'SuperAdmin' || user.role === 'Superadmin')) { %>
+                        <li class="nav-item">
+                            <a data-bs-toggle="collapse" href="#CompanyEmployee">
+                                <i class="fas fa-users-cog"></i>
+                                <p>User Management</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="CompanyEmployee">
+                                <ul class="nav nav-collapse">
+                                    <li><a href="/EmployeeRegister"><span class="sub-item">User Creation</span></a></li>
+                                    <li><a href="/EmployeeList"><span class="sub-item">User Report</span></a></li>
+                                </ul>
+                            </div>
+                        </li>
+                       <% } %>
+
+                        <li class="nav-item">
+                            <a data-bs-toggle="collapse" href="#MISReport">
+                                <i class="fas fa-file-invoice"></i>
+                                <p>MIS Report</p>
+                                <span class="caret"></span>
+                            </a>
+                            <div class="collapse" id="MISReport">
+                                <ul class="nav nav-collapse">
+                                    <li><a href="/TotalLiveCustomerTable"><span class="sub-item">Total Live Customer</span></a></li>
+                                    <li><a href="/AMCExpiredThirtyDaysT"><span class="sub-item">AMC Expiry (30 Days)</span></a></li>
+                                    <li><a href="/AMCExpiredT"><span class="sub-item">Expired AMC</span></a></li>
+                                    <li><a href="/TotalCustomerTable"><span class="sub-item">All Customer Details</span></a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-panel">
+            <div class="main-header">
+                <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                    <div class="container-fluid">
+                        <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                            <li class="nav-item topbar-user dropdown hidden-caret">
+                                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#">
+                                    <div class="avatar-sm">
+                                        <img src="/assets/img/profile.jpg" alt="..." class="avatar-img rounded-circle" />
+                                    </div>
+                                    <span class="profile-username">
+                                        <span class="op-7">Hi,</span>
+                                        <span class="fw-bold"><%= (user && user.name) ? user.name : 'User' %></span>
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                    <div class="dropdown-user-scroll scrollbar-outer">
+                                        <li>
+                                            <div class="user-box">
+                                                <div class="avatar-lg"><img src="/assets/img/profile.jpg" alt="profile" class="avatar-img rounded" /></div>
+                                                <div class="u-text">
+                                                    <h4><%= user ? user.user_name : 'User' %></h4>
+                                                    <p class="text-muted"><%= user ? user.user_email : '' %></p>
+                                                    <a href="/EmployeeU/<%= user ? user.user_id : '' %>" class="btn btn-xs btn-secondary btn-sm">View Profile</a>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="/Logout">Logout</a>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>

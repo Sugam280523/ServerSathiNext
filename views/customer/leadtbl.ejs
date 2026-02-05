@@ -1,0 +1,295 @@
+<%- include('../partials/header') %>
+
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Customer</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Tables</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Lead Customer Details</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">            
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Lead Customer Details</h4>
+                  </div>
+                   <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="multi-filter-select-CustomerLead" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Firm Name</th>
+                                        <th>Name</th>
+                                        <th>Mobile</th>
+                                        <th>City</th>
+                                        <th>State</th>
+                                        <th>Partner</th>
+                                        <th>Lead Date</th>
+                                        <th>Lead Days</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Firm Name</th>
+                                        <th>Name</th>
+                                        <th>Mobile</th>
+                                        <th>City</th>
+                                        <th>State</th>
+                                        <th>Partner</th>
+                                        <th>Lead Date</th>
+                                        <th>Lead Days</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+<%- include('../partials/footer') %>
+<div class="modal fade" id="editCustomerLeadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-info-circle"></i> Customer Lead Update</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+        <div class="modal-content">
+            <form id="editCustomerLeadForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="CustomerId" id="edit_CustomerId">
+                    
+                    <div class="form-group">
+                        <label>Firm Name</label>
+                        <input type="text" name="FirmName" id="edit_FirmName" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Owner Name</label>
+                        <input type="text" name="CustomerName" id="edit_CustomerName" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile</label>
+                        <input type="text" name="mobilenumber" id="edit_mobilenumber" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>city</label>
+                        <input type="text" name="city" id="edit_city" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_State">State</label>
+                        <select class="form-select" id="edit_State" name="State">
+                            <option value="" disabled selected>Select state</option>
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+                        </select>
+                    </div>
+
+                <div class="form-group">
+                    <label for="edit_Address">Address</label>
+                    <textarea class="form-control" id="edit_Address" name="Address"rows="2"></textarea>
+                </div>
+                    <div class="form-group">
+                        <label>serialnumber</label>
+                        <input type="text" name="serialnumber" id="edit_serialnumber" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    // 1. Check if table exists
+    if ($('#multi-filter-select-CustomerLead').length === 0) return;
+
+    // 2. Initialize
+    const table = $('#multi-filter-select-CustomerLead').DataTable({
+        serverSide: true,
+        processing: true,
+        dom: '<"row mb-3"<"col-md-6"B><"col-md-6 text-end"f>>rt<"row"<"col-md-6"i><"col-md-6 text-end"p>>',
+        buttons: [
+            { extend: 'excel', className: 'btn btn-success btn-sm', text: '<i class="fas fa-file-excel"></i> Excel' },
+            { extend: 'pdf', className: 'btn btn-danger btn-sm', text: '<i class="fas fa-file-pdf"></i> PDF' },
+            { extend: 'print', className: 'btn btn-info btn-sm', text: '<i class="fas fa-print"></i> Print' },
+            { extend: 'colvis', className: 'btn btn-secondary btn-sm', text: '<i class="fas fa-columns"></i> Columns' }
+        ],
+        ajax: {
+            url: "/LeadCustomer__Table__GetData",
+            type: "POST"
+        },
+        columns: [
+            { data: 'DB_Cust__FirmName' },
+            { data: 'DB_Cust__Name' },
+            { data: 'DB_Cust__MobileNo' },
+            { data: 'DB_Cust__city' },
+            { data: 'DB_Cust__State' },
+            { data: 'DB_Cust__ParntnerNo' },
+            { data: 'DB_Cust__LeadDate' },
+            { data: 'DB_lead_Days' }
+        ],
+        // If this section causes the nTf error, your <tfoot> is missing/wrong
+        initComplete: function () {
+            this.api().columns().every(function () {
+                var column = this;
+                var footer = column.footer();
+                if (footer) { // Safety check
+                    $('<input type="text" class="form-control form-control-sm" placeholder="Search" />')
+                        .appendTo($(footer).empty())
+                        .on('keyup change clear', function () {
+                            if (column.search() !== this.value) {
+                                column.search(this.value).draw();
+                            }
+                        });
+                }
+            });
+        }
+    });
+});
+     
+function editCustomerLead(id) {
+    // Show a loader or disable button if needed
+    fetch(`/get-Customer/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
+        .then(data => {
+            // Check if data is an array and has at least one item
+            const customer = Array.isArray(data) ? data[0] : data;
+
+            if (!customer) {
+                alert("No customer data found");
+                return;
+            }
+
+            // Now use 'customer' instead of 'data' to populate the fields
+            document.getElementById('edit_CustomerId').value   = customer.DB_Cust__Id || "";
+            document.getElementById('edit_FirmName').value     = customer.DB_Cust__FirmName || "";
+            document.getElementById('edit_CustomerName').value = customer.DB_Cust__Name || ""; 
+            document.getElementById('edit_mobilenumber').value = customer.DB_Cust__MobileNo || "";
+            document.getElementById('edit_city').value         = customer.DB_Cust__city || "";
+            if (customer.DB_Cust__State) {
+                document.getElementById('edit_State').value = customer.DB_Cust__State;
+            } else {
+                // Reset to default if no state exists
+                document.getElementById('edit_State').selectedIndex = 0;
+            }
+            document.getElementById('edit_Address').value      = customer.DB_Cust__Address || "";
+            document.getElementById('edit_serialnumber').value = customer.DB_Cust__SerialKey || "";
+            
+            // Show the modal
+            $('#editCustomerLeadModal').modal('show');
+        })
+        .catch(err => {
+            console.error("Error fetching data:", err);
+            alert("Could not load data. Check console for details.");
+        });
+}
+
+// 2. Handle Form Submission via AJAX
+$('#editCustomerLeadForm').on('submit', function(e) {
+        e.preventDefault();
+
+        // 1. BASIC VALIDATION
+        let isValid = true;
+        let firstEmptyField = null;
+
+        // Select all inputs and selects inside the form except the file input (if optional)
+        $(this).find('input[type="text"], input[type="email"], select, textarea').each(function() {
+            // Trim value to prevent spaces from passing as valid data
+            if ($(this).val() === null || $(this).val().trim() === "") {
+                $(this).addClass('is-invalid'); // Adds red border (Bootstrap class)
+                isValid = false;
+                if (!firstEmptyField) firstEmptyField = $(this);
+            } else {
+                $(this).removeClass('is-invalid');
+                $(this).addClass('is-valid');
+            }
+        });
+
+        if (!isValid) {
+            alert('All fields are compulsory. Please fill in the missing details.');
+            if (firstEmptyField) firstEmptyField.focus(); // Scroll to the first error
+            return false;
+        }
+
+        // 2. PROCEED WITH AJAX IF VALID
+        let formData = new FormData(this);
+    
+    $.ajax({
+        url: '/update-Customer-Lead', // Create this route in Node.js
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        
+        success: function(response) {
+            if (response.status === "success") {
+                    alert(response.message); // "Customer Updated Successfully."
+                    $('#editCustomerLeadModal').modal('hide');
+                    
+                    // This is the "magic" line that refreshes your table 
+                    // without refreshing the whole browser page
+                    $('#multi-filter-select-CustomerLead').DataTable().ajax.reload(null, false);
+                } else {
+                    alert("Error: " + response.message);
+                }
+        },
+        error: function(err) {
+            alert('Error updating record');
+        }
+    });
+});
+</script>

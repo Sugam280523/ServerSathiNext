@@ -1,0 +1,311 @@
+<%- include('../partials/header') %>
+
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Customer</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Tables</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Active Customer Details</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">            
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Active Customer Details</h4>
+                  </div>
+                   <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="multi-filter-select-CustomerDemo" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Firm Name</th>
+                                        <th>Name</th>
+                                        <th>Mobile</th>
+                                        <th>City</th>
+                                        <th>State</th>
+                                        <th>Client Lic No</th>
+                                        <th>Partner</th>
+                                        <th>Demo Date</th>
+                                        <th>Demo Days</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Firm Name</th>
+                                        <th>Name</th>
+                                        <th>Mobile</th>
+                                        <th>City</th>
+                                        <th>State</th>
+                                        <th>Client Lic No</th>
+                                        <th>Partner</th>
+                                        <th>Demo Date</th>
+                                        <th>Demo Days</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+<%- include('../partials/footer') %>
+<div class="modal fade" id="editCustomerLeadinfoModal" tabindex="-1" aria-labelledby="exampleModalLabel">
+  <div class="modal-dialog modal-lg"> <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Customer Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+                    
+                    
+                    <div class="form-group">
+                        <span id="edit_FirmName" class="form-control"></span>
+                    </div>
+                 
+                </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!---------------------------------------------------------------------model data update--------------------->
+<div class="modal fade" id="editCustomerDemoUpdateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-info-circle"></i> Customer Demo Update</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+        <div class="modal-content">
+            <form id="editEmployeeDemoUpdateForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="CustomerId" id="edit_CustomerId">
+                    
+                    <div class="form-group">
+                        <label>Client Lic No.</label>
+                        <input type="text" name="CustLicNo" id="edit_CustLicNo" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Api Key</label>
+                        <input type="text" name="ApiKey" id="edit_ApiKey" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Client Secret Key</label>
+                        <input type="text" name="clientsecret" id="edit_clientsecret" class="form-control">
+                    </div>
+                    
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    // 1. Check if table exists
+    if ($('#multi-filter-select-CustomerDemo').length === 0) return;
+
+    // 2. Initialize
+    const table = $('#multi-filter-select-CustomerDemo').DataTable({
+        serverSide: true,
+        processing: true,
+        dom: '<"row mb-3"<"col-md-6"B><"col-md-6 text-end"f>>rt<"row"<"col-md-6"i><"col-md-6 text-end"p>>',
+        buttons: [
+            { extend: 'excel', className: 'btn btn-success btn-sm', text: '<i class="fas fa-file-excel"></i> Excel' },
+            { extend: 'pdf', className: 'btn btn-danger btn-sm', text: '<i class="fas fa-file-pdf"></i> PDF' },
+            { extend: 'print', className: 'btn btn-info btn-sm', text: '<i class="fas fa-print"></i> Print' },
+            { extend: 'colvis', className: 'btn btn-secondary btn-sm', text: '<i class="fas fa-columns"></i> Columns' }
+        ],
+        ajax: {
+            url: "/DemoCustomer__Table__GetData",
+            type: "POST"
+        },
+        columns: [
+            { data: 'DB_Cust__FirmName' },
+            { data: 'DB_Cust__Name' },
+            { data: 'DB_Cust__MobileNo' },
+            { data: 'DB_Cust__city' },
+            { data: 'DB_Cust__State' },
+            { data: 'DB_Cust__LicNo' },
+            { data: 'DB_Cust__ParntnerNo' },
+            { data: 'DB_Cust__LeadDate' },
+            { data: 'DB_lead_Days' }
+        ],
+        // If this section causes the nTf error, your <tfoot> is missing/wrong
+        initComplete: function () {
+            this.api().columns().every(function () {
+                var column = this;
+                var footer = column.footer();
+                if (footer) { // Safety check
+                    $('<input type="text" class="form-control form-control-sm" placeholder="Search" />')
+                        .appendTo($(footer).empty())
+                        .on('keyup change clear', function () {
+                            if (column.search() !== this.value) {
+                                column.search(this.value).draw();
+                            }
+                        });
+                }
+            });
+        }
+    });
+});
+     
+function editCustomerDemo(id, userRole) {
+    fetch(`/get-Customer/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
+        .then(data => {
+            const customer = Array.isArray(data) ? data[0] : data;
+
+            if (!customer) {
+                $('#customerModalBody').html('<p class="text-center">No data found.</p>');
+                return;
+            }
+
+            // Build HTML
+            let html_dataExp = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Firm Name:</strong> ${customer.DB_Cust__FirmName || 'NA'}</p>
+                        <p><strong>Customer Name:</strong> ${customer.DB_Cust__Name || 'NA'}</p>
+                        <p><strong>Mobile No:</strong> ${customer.DB_Cust__MobileNo || 'NA'}</p>
+                        <p><strong>State:</strong> ${customer.DB_Cust__State || 'NA'}</p>
+                        <p><strong>Serial Key:</strong> ${customer.DB_Cust__SerialKey || 'NA'}</p>
+                        <p><strong>Partner Name:</strong> ${customer.PartnerName || 'NA'}</p>
+                        <p><strong>Address:</strong> ${customer.DB_Cust__Address || 'NA'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Client Lic No:</strong> ${customer.DB_Cust__LicNo || 'NA'}</p>
+                        <p><strong>API Key:</strong> ${userRole === "SuperAdmin" ? customer.DB_ApiKey : 'xxxxxxxxxxxx'}</p>
+                        <p><strong>Client Secret Key:</strong> ${userRole === "SuperAdmin" ? customer.DB__clientsecret : 'xxxxxxxxxxxx'}</p>
+                    </div>
+                </div>`;
+
+            // 1. Inject Data
+           // $('#customerModalBody').append(html_dataExp);
+             document.getElementById('edit_FirmName').innerHTML  = html_dataExp;
+            // 2. Trigger Modal
+            const modalElement = document.getElementById('editCustomerLeadinfoModal');
+            const myModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            myModal.show();
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("Could not load details.");
+        });
+}
+
+//data to update model 
+function editCustomerDemoKeyUpdate(id) {
+    // Show a loader or disable button if needed
+    fetch(`/get-Customer/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
+        .then(data => {
+            // Check if data is an array and has at least one item
+            const customer = Array.isArray(data) ? data[0] : data;
+
+            if (!customer) {
+                alert("No customer data found");
+                return;
+            }
+
+            // Now use 'customer' instead of 'data' to populate the fields
+            document.getElementById('edit_CustomerId').value   = customer.DB_Cust__Id || "";
+            document.getElementById('edit_CustLicNo').value     = customer.DB_Cust__LicNo || "";
+            document.getElementById('edit_ApiKey').value = customer.DB_ApiKey || ""; 
+            document.getElementById('edit_clientsecret').value = customer.DB__clientsecret || "";
+            
+            // Show the modal
+            $('#editCustomerDemoUpdateModal').modal('show');
+        })
+        .catch(err => {
+            console.error("Error fetching data:", err);
+            alert("Could not load data. Check console for details.");
+        });
+}
+// 2. Handle Form Submission via AJAX
+$('#editEmployeeDemoUpdateForm').on('submit', function(e) {
+        e.preventDefault();
+
+        // 1. BASIC VALIDATION
+        let isValid = true;
+        let firstEmptyField = null;
+
+        // Select all inputs and selects inside the form except the file input (if optional)
+        $(this).find('input[type="text"], input[type="email"], select, textarea').each(function() {
+            // Trim value to prevent spaces from passing as valid data
+            if ($(this).val() === null || $(this).val().trim() === "") {
+                $(this).addClass('is-invalid'); // Adds red border (Bootstrap class)
+                isValid = false;
+                if (!firstEmptyField) firstEmptyField = $(this);
+            } else {
+                $(this).removeClass('is-invalid');
+                $(this).addClass('is-valid');
+            }
+        });
+
+        if (!isValid) {
+            alert('All fields are compulsory. Please fill in the missing details.');
+            if (firstEmptyField) firstEmptyField.focus(); // Scroll to the first error
+            return false;
+        }
+
+        // 2. PROCEED WITH AJAX IF VALID
+        let formData = new FormData(this);
+    
+    $.ajax({
+        url: '/update-Customer-Demo', // Create this route in Node.js
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        
+        success: function(response) {
+            if (response.status === "success") {
+                    alert(response.message); // "Customer Updated Successfully."
+                    $('#editCustomerDemoUpdateModal').modal('hide');
+                    
+                    // This is the "magic" line that refreshes your table 
+                    // without refreshing the whole browser page
+                    $('#multi-filter-select-CustomerDemo').DataTable().ajax.reload(null, false);
+                } else {
+                    alert("Error: " + response.message);
+                }
+        },
+        error: function(err) {
+            alert('Error updating record');
+        }
+    });
+});
+</script>

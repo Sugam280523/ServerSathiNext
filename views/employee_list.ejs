@@ -1,0 +1,280 @@
+<%- include('partials/header') %>
+
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Customer</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Tables</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Active Customer Details</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">            
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Active Customer Details</h4>
+                  </div>
+                   <div class="card-body">
+                    <div class="row mb-3">
+                            <div class="col-md-3">
+                                <select id="roleFilter" class="form-select">
+                                    <option value="">All Roles</option>
+                                    <option value="Admin">Admin</option>
+                                    <option value="User">User</option>
+                                    <option value="Partner">Partner</option>
+                                </select>
+                            </div>
+                        </div>
+                            <div class="table-responsive">
+                                    <table id="employeeGrid" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Profile</th>
+                                        <th>Name</th>  
+                                        <th>Email Id</th>
+                                        <th>Password</th>  
+                                        <th>Mobile Number</th>   
+                                        <th>Designation</th>  
+                                        <th>UserRole</th> 
+                                        <th>CurrentDate</th>
+                                        <th>UpdateDate</th>  
+                                        <th>Who's Insert</th>  
+                                        <th>Who's Update</th>   
+                                        <th>Status</th>  
+                                        <th>Action</th> 
+                                             </tr>
+                                </thead>
+                            </table>            
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+<%- include('partials/footer') %>
+<div class="modal fade" id="editEmployeeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editEmployeeForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" name="EmployeeId" id="edit_EmployeeId">
+                    
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="EmployeeName" id="edit_EmployeeName" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="EmployeeEmailId" id="edit_EmployeeEmailId" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Mobile</label>
+                        <input type="text" name="DB_UserMobileNo" id="edit_DB_UserMobileNo" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Designation</label>
+                        <input type="text" name="DB_Designation" id="edit_DB_Designation" class="form-control">
+                    </div>
+                    <div class="form-group">
+                    <label for="edit_DB_UserRole">Employee Role</label>
+                    <select class="form-select" id="edit_DB_UserRole" name="DB_UserRole">
+                        <option value="Admin">Admin</option>
+                        <option value="User">User</option>
+                        <option value="Partner">Partner</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit_DB_UserStatus">User Status</label>
+                    <select class="form-select" id="edit_DB_UserStatus" name="DB_UserStatus">
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+                    <div class="form-group">
+                        <label>Profile Image</label>
+                        <input type="file" name="DB_UserProfile" class="form-control">
+                        <small id="currentProfileName" class="text-muted"></small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    // Assign the table to a constant so you can call .ajax.reload() on it
+    const table = $('#employeeGrid').DataTable({
+        processing: true,
+        serverSide: true,
+        dom: 'Bfrtip', 
+        buttons: [
+            {
+                extend: 'excel',
+                className: 'btn btn-success',
+                text: '<i class="fas fa-file-excel"></i> Excel'
+            },
+            {
+                extend: 'pdf',
+                className: 'btn btn-danger',
+                text: '<i class="fas fa-file-pdf"></i> PDF'
+            },
+            {
+                extend: 'print',
+                className: 'btn btn-info',
+                text: '<i class="fas fa-print"></i> Print'
+            },
+            {
+                extend: 'colvis',
+                text: '<i class="fas fa-columns"></i> Columns',
+                className: 'btn btn-secondary btn-sm'
+            }
+        ],
+        ajax: {
+            url: "/Employee__Table__GetData",
+            data: function (d) {
+                d.role = $('#roleFilter').val(); 
+            }
+        },
+        columns: [
+            { 
+                data: "DB_UserProfile",
+                render: function(data) {
+                    // REMOVE "/public" from the path. Express serves contents of public, not the folder itself.
+                    const imageUrl = `/uploads/${data}`; 
+                    const defaultImg = "/uploads/emp-perment.jpg"; 
+                    
+                    return `<img src="${imageUrl}" class="avatar-img rounded-circle" 
+                            style="width: 40px; height: 40px; object-fit: cover;" 
+                            onerror="this.onerror=null;this.src='${defaultImg}';">`;
+                }
+            },
+            { data: "EmployeeName" },
+            { data: "DB_UserEmailId" },
+            { data: "DB_User__Password",
+                render: function(data) {
+                    if (!data) return "";
+                    const decoded = atob(data);
+                    return `
+                        <div class="input-group" style="width: 150px;">
+                            <input type="password" class="form-control form-control-sm pwd-field" value="${decoded}" readonly style="border:none; background:transparent;">
+                            <button class="btn btn-sm btn-link toggle-password" type="button">
+                                <i class="fa fa-eye"></i>
+                            </button>
+                        </div>`;
+                }
+             },
+            { data: "DB_UserMobileNo" },
+            { data: "DB_Designation" },
+            { data: "DB_UserRole" },
+            { data: "DB_User__CurrentDate" },
+            { data: "DB_User__LastUpdateDate" },
+            { data: "CreatorName", defaultContent: "System" }, 
+            { data: "UpdaterName", defaultContent: "System" },
+            { 
+                data: "DB_UserStatus",
+                render: function(data) {
+                    return data == 1 ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-danger">Inactive</span>';
+                }
+            },
+            {
+                data: "DB_UserId",
+                render: function(data) {
+                    return `<button class="btn btn-primary btn-sm" onclick="editUser(${data})">Edit</button>`;
+                }
+            }
+        ]
+    });
+
+    // Single listener to refresh table on filter change
+    $('#roleFilter').on('change', function() {
+        table.ajax.reload();
+    });
+});    
+$(document).on('click', '.toggle-password', function() {
+    let input = $(this).closest('.input-group').find('.pwd-field');
+    let icon = $(this).find('i');
+    
+    if (input.attr('type') === 'password') {
+        input.attr('type', 'text');
+        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+        input.attr('type', 'password');
+        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+});      
+function editUser(id) {
+    fetch(`/get-employee/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            // Populate the modal fields - ensuring IDs match HTML exactly
+            document.getElementById('edit_EmployeeId').value = data.DB_UserId;
+            document.getElementById('edit_EmployeeName').value = data.EmployeeName || data.DB_UserName; 
+            document.getElementById('edit_EmployeeEmailId').value = data.DB_UserEmailId;
+            document.getElementById('edit_DB_UserMobileNo').value = data.DB_UserMobileNo;
+            document.getElementById('edit_DB_Designation').value = data.DB_Designation;
+            document.getElementById('edit_DB_UserRole').value = data.DB_UserRole;
+            
+            // Status Dropdown
+            document.getElementById('edit_DB_UserStatus').value = data.DB_UserStatus;
+            
+            // For files, we show the name since we can't set the value of a file input
+            if(document.getElementById('currentProfileName')){
+                document.getElementById('currentProfileName').innerText = "Current: " + data.DB_UserProfile;
+            }
+            
+            // Show the modal
+            $('#editEmployeeModal').modal('show');
+        })
+        .catch(err => {
+            console.error("Error fetching employee:", err);
+            alert("Could not load employee data");
+        });
+}
+
+// 2. Handle Form Submission via AJAX
+document.getElementById('editEmployeeForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+
+    fetch('/EmployeeUpdate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(response => {
+        if(response.status === "success") {
+            alert(response.message);
+            location.reload(); // Refresh table to see changes
+        } else {
+            alert("Update failed: " + response.message);
+        }
+    });
+});
+</script>

@@ -1,0 +1,171 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3">Employee/Partner</h3>
+      <ul class="breadcrumbs mb-3">
+        <li class="nav-home">
+          <a href="/Dashboard">
+            <i class="icon-home"></i>
+          </a>
+        </li>
+        <li class="separator">
+          <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+          <a href="#">Employee</a>
+        </li>
+        <li class="separator">
+          <i class="icon-arrow-right"></i>
+        </li>
+        <li class="nav-item">
+          <a href="#">Employee/Partner Register Form</a>
+        </li>
+      </ul>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Employee/Partner Details</div>
+            <p><span class="text-danger">*</span> All fields are mandatory</p>
+          </div>
+          <div class="card-body">
+            <form action="/EmployeeRegister" method="POST" autocomplete="off" enctype="multipart/form-data">
+              
+              <% if (success) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Success!</strong> <%= success %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error!</strong> <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+              <div class="row">
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="EmployeeName">Employee Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="EmployeeName"
+                      name="EmployeeName"
+                      placeholder="Employee Name"
+                      value="<%= typeof formData !== 'undefined' ? formData.EmployeeName : '' %>"
+                    />
+                    <span style="color:red;"><%= typeof errors !== 'undefined' && errors.EmployeeName ? errors.EmployeeName : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="UserPassword">Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="UserPassword"
+                      name="UserPassword"
+                      placeholder="Enter User Password"
+                    />
+                    <span style="color:red;"><%= typeof errors !== 'undefined' && errors.UserPassword ? errors.UserPassword : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="CUserPassword">Confirm Password</label>
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="CUserPassword"
+                      name="CUserPassword"
+                      placeholder="Enter Confirm Password"
+                    />
+                    <span style="color:red;"><%= typeof errors !== 'undefined' && errors.CUserPassword ? errors.CUserPassword : '' %></span>
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="EmployeeEmailId">Email ID</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="EmployeeEmailId"
+                      name="EmployeeEmailId"
+                      placeholder="Enter Employee Email ID"
+                      value="<%= typeof formData !== 'undefined' ? formData.EmployeeEmailId : '' %>"
+                    />
+                    <span style="color:red;"><%= typeof errors !== 'undefined' && errors.EmployeeEmailId ? errors.EmployeeEmailId : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="EmployeeMobileNo">Mobile No.</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="EmployeeMobileNo"
+                      name="EmployeeMobileNo"
+                      placeholder="Enter Mobile Number"
+                      value="<%= typeof formData !== 'undefined' ? formData.EmployeeMobileNo : '' %>"
+                    />
+                    <span style="color:red;"><%= typeof errors !== 'undefined' && errors.EmployeeMobileNo ? errors.EmployeeMobileNo : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="EDesignation">Designation</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="EDesignation"
+                      name="EDesignation"
+                      placeholder="Enter Designation"
+                      value="<%= typeof formData !== 'undefined' ? formData.EDesignation : '' %>"
+                    />
+                    <span style="color:red;"><%= typeof errors !== 'undefined' && errors.EDesignation ? errors.EDesignation : '' %></span>
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="EmployeeRole">Employee Role</label>
+                    <select class="form-select" id="EmployeeRole" name="EmployeeRole">
+                      <option disabled selected>Select Employee Role</option>
+                      <option value="Admin" <%= (typeof formData !== 'undefined' && formData.EmployeeRole === 'Admin') ? 'selected' : '' %>>Admin</option>
+                      <option value="User" <%= (typeof formData !== 'undefined' && formData.EmployeeRole === 'User') ? 'selected' : '' %>>User</option>
+                      <option value="Partner" <%= (typeof formData !== 'undefined' && formData.EmployeeRole === 'Partner') ? 'selected' : '' %>>Partner</option>
+                    </select>
+                    <span style="color:red;"><%= typeof errors !== 'undefined' && errors.EmployeeRole ? errors.EmployeeRole : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="EmployeeProfile">User Profile</label>
+                    <input
+                      type="file"
+                      class="form-control"
+                      id="EmployeeProfile"
+                      name="EmployeeProfile"
+                    />
+                  </div>
+
+                  <div class="form-group mt-3">
+                    <div class="card-action">
+                      <button type="submit" class="btn btn-success">Submit</button>
+                      <button type="button" class="btn btn-danger" onclick="window.location.reload();">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

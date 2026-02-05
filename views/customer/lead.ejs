@@ -1,0 +1,142 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="page-header">
+      <h3 class="fw-bold mb-3">Customer</h3>
+      <ul class="breadcrumbs mb-3">
+        <li class="nav-home"><a href="#"><i class="icon-home"></i></a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Customer</a></li>
+        <li class="separator"><i class="icon-arrow-right"></i></li>
+        <li class="nav-item"><a href="#">Customer Register Form</a></li>
+      </ul>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Customer Details</div>
+            <p><span class="text-danger">*</span> All fields are mandatory</p>
+          </div>
+          <div class="card-body">
+            <form action="/Lead" method="POST" autocomplete="off">
+              
+              <% if (success) { %>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>Success!</strong> <%= success %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+            <% if (error) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error!</strong> <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
+
+              <div class="row">
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="FirmName">Firm Name</label>
+                    <input type="text" class="form-control" id="FirmName" name="FirmName" 
+                           placeholder="Enter Firm Name" value="<%= formData.FirmName || '' %>">
+                    <span class="text-danger small"><%= errors.FirmName ? errors.FirmName.msg : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="CustomerName">Owner Name</label>
+                    <input type="text" class="form-control" id="CustomerName" name="CustomerName" 
+                           placeholder="Owner Name" value="<%= formData.CustomerName || '' %>">
+                    <span class="text-danger small"><%= errors.CustomerName ? errors.CustomerName.msg : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="mobilenumber">Mobile No.</label>
+                    <input type="number" class="form-control" id="mobilenumber" name="mobilenumber" 
+                           placeholder="Mobile Number" value="<%= formData.mobilenumber || '' %>">
+                    <span class="text-danger small"><%= errors.mobilenumber ? errors.mobilenumber.msg : '' %></span>
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" class="form-control" id="city" name="city" 
+                           placeholder="Enter City" value="<%= formData.city || '' %>">
+                    <span class="text-danger small"><%= errors.city ? errors.city.msg : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="State">State</label>
+                    <select class="form-select" id="State" name="State">
+                      <option disabled selected>Select state</option>
+                      <% 
+                        const states = ['Andhra Pradesh', 'Bihar', 'Gujarat', 'Maharashtra', 'Punjab', 'Rajasthan']; 
+                        states.forEach(function(state) { 
+                          const selected = (formData.State === state) ? 'selected' : '';
+                      %>
+                        <option value="<%= state %>" <%= selected %>><%= state %></option>
+                      <% }); %>
+                    </select>
+                    <span class="text-danger small"><%= errors.State ? errors.State.msg : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="Address">Address</label>
+                    <textarea class="form-control" id="Address" name="Address" rows="2"><%= formData.Address || '' %></textarea>
+                    <span class="text-danger small"><%= errors.Address ? errors.Address.msg : '' %></span>
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                  <div class="form-group">
+                    <label for="serialnumber">Tally Serial No.</label>
+                    <input type="number" class="form-control" id="serialnumber" name="serialnumber" 
+                           maxlength="8" value="<%= formData.serialnumber || '' %>">
+                    <span class="text-danger small"><%= errors.serialnumber ? errors.serialnumber.msg : '' %></span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="partnerno">Select Partner Name</label>
+                    <select class="form-select" id="partnerno" name="partnerno">
+                        
+                        <% if (user.role === 'Partner') { %>
+                            <% partners.forEach(function(p) { %>
+                                <% if (user.id == p.DB_UserId) { %>
+                                    <option value="<%= p.DB_UserId %>" selected>
+                                        <%= p.DB_UserName %>
+                                    </option>
+                                <% } %>
+                            <% }); %>
+                        <% } else { %>
+                            <option value="1" <%= (formData.partnerno == '1') ? 'selected' : '' %>>SELF</option>
+                            
+                            <% partners.forEach(function(p) { %>
+                                <option value="<%= p.DB_UserId %>" 
+                                        <%= (formData.partnerno == p.DB_UserId) ? 'selected' : '' %>>
+                                    <%= p.DB_UserName %>
+                                </option>
+                            <% }); %>
+                        <% } %>
+                        
+                    </select>
+                </div>
+
+                  <div class="card-action mt-3">
+                    <button type="submit" class="btn btn-success">Submit</button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.reload();">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

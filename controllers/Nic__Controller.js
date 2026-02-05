@@ -155,30 +155,40 @@ const Nic__Controller = {
             const targetUrl = determineUrl(apiType);
 
             // Debugging: Log exactly what is being sent
-           // console.log("FINAL PAYLOAD STRING:", payloadString);
-           // console.log("GENERATED SIGNATURE:", signature);
+            //console.log("FINAL PAYLOAD STRING:", payloadString);
+            //console.log("GENERATED SIGNATURE:", signature);
 
             const response = await axios.post(`https://${targetUrl}`, payloadString, {
-                headers: customHeaders,
-                timeout: 5000 // 2000ms is too short for NIC servers, use 5000ms
+                headers: customHeaders
+                //timeout: 10000 // 2000ms is too short for NIC servers, use 5000ms
             });
 
-           // 6. Success Response (Flattened to the first result)
-                    const nicData = response.data.data || response.data;
-                    const firstItem = Array.isArray(nicData) ? nicData[0] : nicData;
+            // 6. Success Response
+                const nicData = response.data.data || response.data;
+                const dataEArray = Array.isArray(nicData) ? nicData : [nicData];
 
-                    return res.status(200).json({
-                        statusCodec: 200,
-                        Status: "Success",
-                        Message: "Request processed successfully",
-                        data: {
+                // Map through the items to create the specific structure you want
+                const formattedData = dataEArray.map((item, index) => {
+                    if (index === 0) {
+                        // Only for the first item, add the status information
+                        return {
                             statusCode: response.data.statusCode || 200,
                             status: response.data.status || "Success",
                             message: response.data.message || "Order details fetched successfully",
-                            // Spread the first item's properties here
-                            ...(firstItem || {}) 
-                        }
-                    });
+                            ...item
+                        };
+                    }
+                    // For all other items (index 1 to n), return them exactly as they are
+                    return item;
+                });
+
+                // Final JSON response with the formatted data array
+                return res.status(200).json({
+                    statusCode: 200,
+                    Status: "Success",
+                    Message: "Request processed successfully",
+                    data: formattedData
+                });
 
         } catch (error) {
             // 7. Global Catch / Upstream Error Handling
@@ -193,6 +203,75 @@ const Nic__Controller = {
                     status: "Error",
                     message: error.message
                 }
+            });
+        }
+    },
+    ApplicationDataTransfer: async (req, res) => {
+        const { serialKey, ownerCode } = req.body;
+
+    try {
+        // 1. Fetch Customer Details
+        const [rows] = await db.query(
+            `SELECT * FROM db_tbl__customerdetails WHERE DB_Cust__SerialKey = ? AND DB_Cust__LicNo = ?`,
+            [serialKey, ownerCode]
+        );
+
+        if (!rows || rows.length === 0) {
+            return res.status(401).json({
+                statusCode: 401,
+                Status: "Error",
+                Message: "Invalid User"
+            });
+        }
+
+        const customer = rows[0];
+
+        // 2. Fetch API Key (Fixed logic)
+        const [rows_Key_Validate] = await db.query(
+            'SELECT Api_Key FROM tbl_api_key WHERE DB_Cust__Id = ?',
+            [customer.DB_Cust__Id]
+        );
+        const ClientVCApiKey = rows_Key_Validate.length > 0 ? rows_Key_Validate[0].Api_Key : null;
+
+        // 3. Fetch ALL 10+ fields from NIC API table
+        const [Nurl_Key_Validate] = await db.query(
+            'SELECT DB_nicValidater as apitype,DB_nicApi as callapi FROM db_tbl__nicapi'
+        );
+        const nicApiData = Nurl_Key_Validate || {};
+
+        // 4. Final Flat Response
+        return res.status(200).json({
+            statusCode: 200,
+            Status: "Success",
+            Message: "Request processed successfully",
+            data: {
+                // Customer Details
+                CustId: customer.DB_Cust__Id,
+                CustName: customer.DB_Cust__Name,
+                FirmName: customer.DB_Cust__FirmName,
+                MobileNo: customer.DB_Cust__MobileNo,
+                State: customer.DB_Cust__State,
+                City: customer.DB_Cust__city,
+                ClientApiKey: customer.DB_ApiKey,
+                clientSecret: customer.DB__clientsecret,
+                ClientNextAMCDate: customer.DB_Cust__NextAMCDate,
+                ClientSathiCurrentStatus: customer.DB_Cust__SathiCurrentStatus,
+                ClientVIApiKey: customer.DBApiKey,
+                
+                // Fixed API Key
+                ClientVCApiKey: ClientVCApiKey,
+
+                // Spread all fields from db_tbl__nicapi
+                ...nicApiData
+            }
+        });
+
+        } catch (error) {
+            const status = error.response?.status || 500;
+            return res.status(status).json({
+                statusCode: status,
+                Status: "Error",
+                Message: `Internal Server Error: ${error.message}`
             });
         }
     }

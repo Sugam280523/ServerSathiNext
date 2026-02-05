@@ -1,0 +1,215 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="page-inner">
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+      <div>
+        <h3 class="fw-bold mb-3">Dashboard</h3>
+        <h6 class="op-7 mb-2">Welcome - <%= (user && user.user_name) ? user.user_name : 'Sugam' %></h6>
+      </div>
+      <div class="ms-md-auto py-2 py-md-0">
+        <a href="/Customer" class="btn btn-primary btn-round">Add Customer</a>
+      </div>
+    </div>
+
+    <div class="row">
+      <% const stats = [
+        { label: 'Live', value: Total_Live_Customer, icon: 'fa-users', color: 'primary' },
+        { label: 'Lead', value: Total_Lead_Customer, icon: 'fa-user-check', color: 'info' },
+        { label: 'Demo', value: Total_Demo_Customer, icon: 'fa-luggage-cart', color: 'success' },
+        { label: 'AMC Expired', value: Total_AMC_Expired_Customer, icon: 'fa-check-circle', color: 'secondary' },
+        { label: 'Payment Pending', value: Total_Payment_Pending_Customer, icon: 'fa-users', color: 'primary' },
+        { label: 'Payment Received', value: Total_Payment_Recived_Customer, icon: 'fa-user-check', color: 'info' }
+      ]; %>
+
+      <% stats.forEach(stat => { %>
+      <div class="col-sm-6 col-md-2">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-<%= stat.color %> bubble-shadow-small">
+                  <i class="fas <%= stat.icon %>"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category"><%= stat.label %></p>
+                  <h4 class="card-title"><%= stat.value %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+
+    <div class="row">
+      <% const todayStats = [
+        { label: 'Today Live', value: Today_Live_Customer, icon: 'fa-luggage-cart', color: 'success' },
+        { label: 'Today Lead', value: Today_Lead_Customer, icon: 'fa-check-circle', color: 'secondary' },
+        { label: 'Today Demo', value: Today_Demo_Customer, icon: 'fa-users', color: 'primary' },
+        { label: 'Today AMC Expired', value: Today_AMC_Expired_Customer, icon: 'fa-user-check', color: 'info' },
+        { label: 'Today Payment Pending', value: Today_Payment_Pending_Customer, icon: 'fa-luggage-cart', color: 'success' },
+        { label: 'Today Payment Received', value: Today_Payment_Recived_Customer, icon: 'fa-check-circle', color: 'secondary' }
+      ]; %>
+
+      <% todayStats.forEach(stat => { %>
+      <div class="col-sm-6 col-md-2">
+        <div class="card card-stats card-round">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-icon">
+                <div class="icon-big text-center icon-<%= stat.color %> bubble-shadow-small">
+                  <i class="fas <%= stat.icon %>"></i>
+                </div>
+              </div>
+              <div class="col col-stats ms-3 ms-sm-0">
+                <div class="numbers">
+                  <p class="card-category"><%= stat.label %></p>
+                  <h4 class="card-title"><%= stat.value %></h4>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-head-row">
+              <div class="card-title">User Statistics</div>
+              <div class="card-tools">
+                <a href="#" class="btn btn-label-success btn-round btn-sm me-2">
+                  <span class="btn-label"><i class="fa fa-pencil"></i></span> Export
+                </a>
+                <a href="#" class="btn btn-label-info btn-round btn-sm">
+                  <span class="btn-label"><i class="fa fa-print"></i></span> Print
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container" style="min-height: 375px">
+              <canvas id="statisticsChart"></canvas>
+            </div>
+            <div id="myChartLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card card-primary card-round">
+          <div class="card-header">
+            <div class="card-head-row">
+              <div class="card-title">Daily Sales</div>
+              <div class="card-tools">
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-label-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Export
+                  </button>
+                  <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#">Action</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-category">March 25 - April 02</div>
+          </div>
+          <div class="card-body pb-0">
+            <div class="mb-4 mt-2">
+              <h1>$4,578.58</h1>
+            </div>
+            <div class="pull-in">
+              <canvas id="dailySalesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card card-round">
+          <div class="card-body">
+            <div class="card-head-row card-tools-still-right">
+              <div class="card-title">AMC EXPIRED CUSTOMER <small>List</small></div>
+            </div>
+            <div class="card-list py-4">
+              <% AMC_Expired_List.forEach(AMCRow => { %>
+              <div class="item-list">
+                <div class="info-user ms-3">
+                  <div class="username"><%= AMCRow.DB_Cust__Name %></div>
+                  <div class="status"><%= AMCRow.DB_Cust__FirmName %></div>
+                </div>
+                <div class="info-user ms-3">
+                  <div class="username"><%= AMCRow.DB_Cust__MobileNo %></div>
+                  <div class="status" style="color:red"><%= AMCRow.DB_Cust__NextAMCDate %></div>
+                </div>
+              </div>
+              <hr />
+              <% }); %>
+            </div>
+            <div class="card-list py-4">
+              <div class="item-list">
+                <div class="info-user ms-3">
+                  <div class="username">Show More - <a href="/AMCExpiredT">Click Here</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div class="card card-round">
+          <div class="card-header">
+            <div class="card-title">PENDING PAYMENT CUSTOMER</div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table align-items-center mb-0">
+                <thead class="thead-light">
+                  <tr>
+                    <th>Name</th>
+                    <th class="text-end">Firm Name</th>
+                    <th class="text-end">Activation Date</th>
+                    <th class="text-end">Mobile No.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% Payment_Due_List.forEach(Prow => { %>
+                  <tr>
+                    <th scope="row">
+                      <button class="btn btn-icon btn-round btn-warning btn-sm me-2">
+                        <i class="fa fa-exclamation-triangle"></i>
+                      </button>
+                      <%= Prow.DB_Cust__Name %>
+                    </th>
+                    <td class="text-end"><%= Prow.DB_Cust__FirmName %></td>
+                    <td class="text-end"><%= Prow.DB_Cust__InstalltionDate %></td>
+                    <td class="text-end"><%= Prow.DB_Cust__MobileNo %></td>
+                  </tr>
+                  <% }); %>
+                  <tr>
+                    <th scope="row"></th>
+                    <td class="text-end"></td>
+                    <td class="text-end"></td>
+                    <td class="text-end"><a href="/PaymentPCT">Click Here</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

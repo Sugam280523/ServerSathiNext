@@ -1,0 +1,223 @@
+<%- include('../partials/header') %>
+
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Customer</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Tables</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Active Customer Details</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">            
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Active Customer Details</h4>
+                  </div>
+                   <div class="card-body">
+                            <div class="table-responsive">
+                                    <table id="multi-filter-select-CustomerActivation" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Firm Name</th>
+                                        <th>Customer Name</th> 
+                                        <th>Mobile Number</th> 
+                                        <th>Address</th>  
+                                        <th>City</th>  
+                                        <th>State</th> 
+                                        <th>Client Lic No</th>
+                                        <th>Serial No.</th>  
+                                        <th>Partner Name</th>  
+                                        <th>Lead Date</th>   
+                                        <th>Demo Date</th>  
+                                        <th>Activation Date</th> 
+                                        <th>Activation Days</th> 
+                                             </tr>
+                                </thead>
+                                <tbody>
+                                    </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Firm Name</th>
+                                        <th>Customer Name</th> 
+                                        <th>Mobile Number</th> 
+                                        <th>Address</th>  
+                                        <th>City</th>  
+                                        <th>State</th> 
+                                        <th>Client Lic No</th>
+                                        <th>Serial No.</th>  
+                                        <th>Partner Name</th>  
+                                        <th>Lead Date</th>   
+                                        <th>Demo Date</th>  
+                                        <th>Activation Date</th> 
+                                        <th>Activation Days</th> 
+                                             </tr>
+                                </tfoot>
+                            </table>            
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+<%- include('../partials/footer') %>
+<div class="modal fade" id="editCustomerActivationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-info-circle"></i> Customer Activation Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+        <div class="modal-content">
+           
+                <div class="modal-body">
+                    
+                    
+                    <div class="form-group">
+                        <span id="edit_FirmName" class="form-control"></span>
+                    </div>
+                 
+                </div>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function() {
+    // 1. Check if table exists
+    if ($('#multi-filter-select-CustomerActivation').length === 0) return;
+
+    // 2. Initialize
+    const table = $('#multi-filter-select-CustomerActivation').DataTable({
+        serverSide: true,
+        processing: true,
+        dom: '<"row mb-3"<"col-md-6"B><"col-md-6 text-end"f>>rt<"row"<"col-md-6"i><"col-md-6 text-end"p>>',
+        buttons: [
+            { extend: 'excel', className: 'btn btn-success btn-sm', text: '<i class="fas fa-file-excel"></i> Excel' },
+            { extend: 'pdf', className: 'btn btn-danger btn-sm', text: '<i class="fas fa-file-pdf"></i> PDF' },
+            { extend: 'print', className: 'btn btn-info btn-sm', text: '<i class="fas fa-print"></i> Print' },
+            { extend: 'colvis', className: 'btn btn-secondary btn-sm', text: '<i class="fas fa-columns"></i> Columns' }
+        ],
+        ajax: {
+            url: "/TotalCustomerTable__GetData",
+            type: "POST"
+        },
+        columns: [
+            { data: 'DB_Cust__FirmName' },
+            { data: 'DB_Cust__Name' },
+            { data: 'DB_Cust__MobileNo' },
+            { data: 'DB_Cust__Address' },
+            { data: 'DB_Cust__city' },
+            { data: 'DB_Cust__State' },
+            { data: 'DB_Cust__LicNo' },
+            { data: 'DB_Cust__SerialKey' },
+            { data: 'DB_Cust__ParntnerNo' },
+            { data: 'DB_Cust__LeadDate' },
+            { data: 'DB_User__DemoDate' },
+            { data: 'DB_User__LetusActivationDate' },
+            { data: 'DB_lead_Days' }
+        ],
+        // If this section causes the nTf error, your <tfoot> is missing/wrong
+        initComplete: function () {
+            this.api().columns().every(function () {
+                var column = this;
+                var footer = column.footer();
+                if (footer) { // Safety check
+                    $('<input type="text" class="form-control form-control-sm" placeholder="Search" />')
+                        .appendTo($(footer).empty())
+                        .on('keyup change clear', function () {
+                            if (column.search() !== this.value) {
+                                column.search(this.value).draw();
+                            }
+                        });
+                }
+            });
+        }
+    });
+});
+     
+function editCustomerActivationDetails(id,userRole) {
+    // Show a loader or disable button if needed
+    fetch(`/get-Customer/${id}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Network response was not ok');
+            return res.json();
+        })
+        .then(data => {
+            // Check if data is an array and has at least one item
+            const customer = Array.isArray(data) ? data[0] : data;
+
+            if (!customer) {
+                alert("No customer data found");
+                return;
+            }
+            const today = new Date();
+                const amcDate = new Date(customer.DB_Cust__NextAMCDate);
+
+                // 2. Calculate the difference in days
+                // (Time difference / milliseconds in one day)
+                const diffTime = amcDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                // 3. Determine color class (Bootstrap classes: text-danger for red, text-success for green)
+                let amcColorClass = "text-success"; // Default green
+
+                if (!customer.DB_Cust__NextAMCDate || customer.DB_Cust__NextAMCDate === 'NA') {
+                    amcColorClass = "text-muted"; // Grey if no date
+                } else if (diffDays <= 30) {
+                    amcColorClass = "text-danger"; // Red if 30 days or less
+                }
+             let html_dataExp = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Firm Name:</strong> ${customer.DB_Cust__FirmName || 'NA'}</p>
+                        <p><strong>Customer Name:</strong> ${customer.DB_Cust__Name || 'NA'}</p>
+                        <p><strong>Mobile No:</strong> ${customer.DB_Cust__MobileNo || 'NA'}</p>
+                        <p><strong>State:</strong> ${customer.DB_Cust__State || 'NA'}</p>
+                        <p><strong>Serial Key:</strong> ${customer.DB_Cust__SerialKey || 'NA'}</p>
+                        <p><strong>Partner Name:</strong> ${customer.DB_Cust__ParntnerNo || 'NA'}</p>
+                        <p><strong>Address:</strong> ${customer.DB_Cust__Address || 'NA'}</p>
+                        <p><strong>Client Lic No:</strong> ${customer.DB_Cust__LicNo || 'NA'}</p>
+                        <p><strong>API Key:</strong> ${userRole === "SuperAdmin" ? customer.DB_ApiKey : 'xxxxxxxxxxxx'}</p>
+                        <p><strong>Client Secret Key:</strong> ${userRole === "SuperAdmin" ? customer.DB__clientsecret : 'xxxxxxxxxxxx'}</p>
+                        
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>AMC Expired :</strong> ${customer.DB_Cust__AMCExpired == 0 ? '<span class="text-danger fw-bold">Expired</span>' : '<span class="text-success fw-bold">Active</span>'}</p><br>
+                        <p><strong>Customer Status:</strong> ${customer.DB_Cust__SathiCurrentStatus || 'NA'}</p><br>
+                        <p><strong>Payment Status:</strong> ${customer.DB_Cust__SathiPaymentStatus == 'R' ? '<span class="text-success fw-bold">Received</span>' : '<span class="text-danger fw-bold">Pending</span>'}</p><br>
+                        <p><strong>Next AMC Date:</strong><span class="${amcColorClass} fw-bold">${customer.DB_Cust__NextAMCDate || 'NA'}</span></p><br>
+                        <p><strong>Lead Register Date:</strong> ${customer.DB_Cust__LeadDate || 'NA'}</p><br>
+                        <p><strong>Demo Register Date:</strong> ${customer.DB_User__DemoDate || 'NA'}</p><br>
+                        <p><strong>Activation Date:</strong> ${customer.DB_User__LetusActivationDate || 'NA'}</p><br>
+                    </div>
+                </div>`;
+            document.getElementById('edit_FirmName').innerHTML  = html_dataExp;
+           
+            // Show the modal
+            $('#editCustomerActivationModal').modal('show');
+        })
+        .catch(err => {
+            console.error("Error fetching data:", err);
+            alert("Could not load data. Check console for details.");
+        });
+}
+
+</script>

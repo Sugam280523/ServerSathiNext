@@ -1,0 +1,250 @@
+<%- include('../partials/header') %>
+
+<div class="container">
+    <div class="page-inner">
+        <div class="page-header">
+            <h3 class="fw-bold mb-3">Customer</h3>
+            <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                    <a href="/">
+                        <i class="icon-home"></i>
+                    </a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Customer</a>
+                </li>
+                <li class="separator">
+                    <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                    <a href="#">Customer Activation</a>
+                </li>
+            </ul>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">Customer Activation</div>
+                        <p><span class="text-danger">*</span> All fields are mandatory</p>
+                    </div>
+                    <div class="card-body">
+                        <form action="/Activation" method="POST" autocomplete="off">
+                            
+                             <% if (success) { %>
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <strong>Success!</strong> <%= success %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            <% } %>
+
+                            <% if (error) { %>
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <strong>Error!</strong> <%= error %>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            <% } %>
+                            <div class="row">
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="form-group">
+                                        <label for="CustomerIDAct">Select Customer</label>
+                                        <select class="form-select" id="CustomerIDAct" name="CustomerIDAct">
+                                            <option disabled selected value="">Select Activation Customer</option>
+                                            <% customerdata.forEach(function(cust) { %>
+                                                <option value="<%= cust.DB_Cust__Id %>">
+                                                    <%= cust.DB_Cust__Name %> [<%= cust.DB_Cust__FirmName %>]
+                                                </option>
+                                            <% }); %>
+                                        </select>
+                                        <% if (errors && errors.CustomerIDAct) { %>
+                                            <span style="color:red;"><%= errors.CustomerIDAct %></span>
+                                        <% } %>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="Customer-Profile-Details">Customer Lead Details</label>
+                                        <div id="Customer-Profile-Details"></div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                <div class="form-group">
+                                    <div id="Customer-Apikeys-Details">
+                                        <% if (user.user_Role === "SuperAdmin") { %>
+                                            <label>Customer Key Details</label>
+                                            <% } %>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="card-action" id="Customer-Demo-Extends"></div>
+                                </div>
+                            </div>
+
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="form-group">
+                                        <label for="PaymentMode">Payment Mode</label>
+                                        <select class="form-select" id="PaymentMode" name="paymentMode">
+                                            <option disabled selected>Select PaymentMode</option>
+                                            <% 
+                                                const modes = ['Cash', 'Online', 'Partner Collection'];
+                                                modes.forEach(function(mode) { 
+                                                    const selected = (oldInput && oldInput.paymentMode === mode) ? 'selected' : '';
+                                            %>
+                                                <option value="<%= mode %>" <%= selected %>><%= mode %></option>
+                                            <% }); %>
+                                        </select>
+                                        <% if (errors && errors.paymentMode) { %>
+                                            <span style="color:red;"><%= errors.paymentMode %></span>
+                                        <% } %>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="PaymentProof">Payment Received</label>
+                                        <input type="text" class="form-control" id="PaymentProof" name="PaymentProof" 
+                                               placeholder="Enter UTR No/Receipt No/P.Name" 
+                                               value="<%= oldInput ? oldInput.PaymentProof : '' %>" />
+                                        <% if (errors && errors.PaymentProof) { %>
+                                            <span style="color:red;"><%= errors.PaymentProof %></span>
+                                        <% } %>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="card-action">
+                                            <button type="submit" class="btn btn-success">Active</button>
+                                            <button type="button" class="btn btn-danger" onclick="location.reload();">Cancel</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+document.getElementById('CustomerIDAct').addEventListener('change', function() {
+    const custId = this.value;
+    const detailBox = document.getElementById('Customer-Profile-Details');
+    const keyBox = document.getElementById('Customer-Apikeys-Details');
+    const extendBox = document.getElementById('Customer-Demo-Extends');
+
+    // DEFENSIVE CHECK: Prevent "null" errors
+    if (detailBox) detailBox.innerHTML = "Loading...";
+    
+    fetch(`/getCustomerDetailsWithActivation/${custId}`)
+    .then(response => response.json())
+    .then(responseObj => {
+        if (responseObj.status === "Success") {
+            const customer = responseObj.data; 
+            const user_Role = responseObj.user_Role || "<%= user.user_Role %>";
+
+            // 1. Display Basic Profile Details
+            if (detailBox) {
+                detailBox.innerHTML = `
+                    <strong>Firm:</strong> ${customer.DB_Cust__FirmName}<br>
+                    <strong>Owner Name:</strong> ${customer.DB_Cust__Name}<br>
+                    <strong>Mobile:</strong> ${customer.DB_Cust__MobileNo}<br>
+                    <strong>City:</strong> ${customer.DB_Cust__city}<br>
+                    <strong>State:</strong> ${customer.DB_Cust__State}<br>
+                    <strong>Serial Key:</strong> ${customer.DB_Cust__SerialKey}<br>
+                    <strong>Address:</strong> ${customer.DB_Cust__Address}<br>
+                `;
+            }
+
+            // 2. Logic for SuperAdmin Keys (Check if keyBox exists first)
+            if (keyBox) {
+                if (user_Role === "SuperAdmin") {
+                    keyBox.innerHTML = `
+                        <label>Customer Key Details</label><br>
+                        <span><strong>Customer Lic No:</strong> ${customer.DB_Cust__LicNo || "NA"}</span><br>
+                        <span><strong>Customer secret Key:</strong> ${customer.DB__clientsecret || "NA"}</span><br>
+                        <span><strong>API Key:</strong> ${customer.DB_ApiKey || "NA"}</span>
+                    `;
+                } else {
+                    keyBox.innerHTML = '';
+                }
+            }
+
+            // 3. Logic for Demo Extension Button
+            if (extendBox) {
+                if (user_Role === "SuperAdmin" || user_Role === "Admin") {
+                    let nextAmcDate = new Date(customer.DB_Cust__NextAMCDate);
+                    let currentDate = new Date();
+
+                    if (nextAmcDate <= currentDate && 
+                        customer.DB_Cust__AMCExpired !== '1' && 
+                        parseInt(customer.Total_Demo_Count) < 2) {
+                        
+                        extendBox.innerHTML = `
+                            <button type="button" class="btn btn-warning" id="btnExtendDemo">
+                                Extend Demo (10 Days)
+                            </button>`;
+                    } else {
+                        extendBox.innerHTML = '<span class="text-muted">No Extension Required Yet</span>';
+                    }
+                }
+            }
+        }
+    })
+    .catch(err => {
+        console.error("Fetch Error:", err);
+        if (detailBox) detailBox.innerHTML = "Error loading details.";
+    });
+});
+// Note: In your previous EJS, the button was created dynamically. 
+// Using $(document).on ensures the click works even for dynamic elements.
+$(document).on('click', '#btnExtendDemo', function(e) {
+    e.preventDefault();
+    
+    // Get ID from the button attribute or the select dropdown
+    var customerId = $('#CustomerIDAct').val(); 
+
+    if(!customerId) {
+        Swal.fire('Error', 'Please select a customer first', 'error');
+        return;
+    }
+
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This will extend the demo by 10 days.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, extend it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "/Customer-Demo-Extend", 
+                type: 'POST',
+                data: { DB_Cust__Id: customerId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Extended!',
+                            text: response.message,
+                            icon: 'success'
+                        }).then(() => {
+                            location.reload(); 
+                        });
+                    } else {
+                        Swal.fire('Failed', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Could not connect to server', 'error');
+                }
+            });
+        }
+    });
+});
+</script>
